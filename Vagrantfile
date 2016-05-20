@@ -24,10 +24,10 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell",
     inline: "sed -ri 's/127\.0\.0\.1\s.*/127.0.0.1 localhost localhost.localdomain/' /etc/hosts"
 
-  config.vm.define "server" do |server|
-    server.vm.network "private_network", ip: "192.168.33.10"
-    server.vm.hostname = "server.ipademo.local"
-    server.vm.provision "shell", :path => "provision.sh", privileged: true
+  config.vm.define "cobalt" do |cobalt|
+    cobalt.vm.network "private_network", ip: "192.168.33.10"
+    cobalt.vm.hostname = "cobalt.ipademo.local"
+    cobalt.vm.provision "shell", :path => "provision.sh", privileged: true
   end
 
   config.vm.define "ipsilon" do |ipsilon|
