@@ -27,26 +27,20 @@ Vagrant.configure(2) do |config|
   config.vm.define "server" do |server|
     server.vm.network "private_network", ip: "192.168.33.10"
     server.vm.hostname = "server.ipademo.local"
+    server.vm.provision "shell", :path => "provision.sh", privileged: true
   end
 
-  config.vm.define "replica" do |replica|
-    replica.vm.network "private_network", ip: "192.168.33.11"
-    replica.vm.hostname = "replica.ipademo.local"
+  config.vm.define "ipsilon" do |ipsilon|
+    ipsilon.vm.network "private_network", ip: "192.168.33.20"
+    ipsilon.vm.hostname = "ipsilon.ipademo.local"
 
-    replica.vm.provision "shell",
+    ipsilon.vm.provision "shell",
       inline: 'echo "nameserver 192.168.33.10" > /etc/resolv.conf'
-  end
-
-  config.vm.define "client" do |client|
-    client.vm.network "private_network", ip: "192.168.33.20"
-    client.vm.hostname = "client.ipademo.local"
-
-    client.vm.provision "shell",
-      inline: 'echo "nameserver 192.168.33.10" > /etc/resolv.conf'
-    client.vm.provision "shell",
+    ipsilon.vm.provision "shell",
       inline: 'sudo sed -i -n "/^<VirtualHost/q;p" /etc/httpd/conf.d/nss.conf'
-    client.vm.provision "shell",
+    ipsilon.vm.provision "shell",
       inline: 'systemctl -q enable httpd && systemctl start httpd'
+    ipsilon.vm.provision "shell", :path => "ipsilon.sh", privileged: true
   end
 
 end
