@@ -43,4 +43,20 @@ Vagrant.configure(2) do |config|
     ipsilon.vm.provision "shell", :path => "ipsilon.sh", privileged: true
   end
 
+  config.vm.define "keycloak" do |keycloak|
+    keycloak.vm.network "private_network", ip: "192.168.33.30"
+    ipsilon.vm.provision "shell",
+      inline: 'echo "nameserver 192.168.33.40" > /etc/resolv.conf'
+    keycloak.vm.hostname = "keycloak.ipademo.local"
+    keycloak.vm.provision "shell", :path => "keycloak.sh"
+    keycloak.vm.provision "file", source: "keycloak-server/", destination: "/home/vagrant/"
+    keycloak.vm.network "forwarded_port", guest: 9080, host: 9080
+    keycloak.vm.provision "up", type: "shell", run: "always", inline: '$JBOSS_HOME/bin/standalone.sh -b 0.0.0.0 -Djboss.http.port=9080 -Dkeycloak.import=/home/vagrant/keycloak-server/freeipa-realm.json &'
+  end
+
+  config.vm.define "arsenic" do |arsenic|
+    arsenic.vm.network "private_network", ip: "192.168.33.40"
+    arsenic.vm.hostname = "arsenic.ipademo.local"
+    arsenic.vm.provision "shell", :path => "arsenic.sh"
+  end
 end
